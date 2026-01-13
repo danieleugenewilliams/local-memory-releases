@@ -1,6 +1,6 @@
 # Local Memory (localmemory.co)
 
-**Version 1.2.0** - AI-powered persistent memory system for developers working with Claude Code, Claude Desktop, Gemini, Codex, Cursor, and other coding agents.
+**Version 1.3.0** - AI-powered persistent memory system for developers working with Claude Code, Claude Desktop, Gemini, Codex, Cursor, and other coding agents.
 
 Transform your AI interactions with intelligent memory that grows smarter over time. Build persistent knowledge bases, track learning progression, and maintain context across conversations. Local Memory provides MCP, REST API, and Command-line interfaces for you and your coding agents to store, retrieve, discover, and analyze memories to give your agent the right context for it's work and tasks.
 
@@ -98,12 +98,26 @@ Add to your Claude Desktop configuration file:
 
 When configured, Claude will have access to these memory tools:
 
-- `store_memory` - Save important information
+**Core Tools:**
+- `observe` - Record observations with knowledge level support (L0-L3)
 - `search` - Find memories with semantic search
-- `analysis` - AI-powered Q&A on stored knowledge
-- `relationships` - Discover and map memory connections
-- `categories` - Organize memories intelligently
-- Plus comprehensive memory management tools
+- `bootstrap` - Initialize sessions with knowledge context
+
+**Knowledge Evolution:**
+- `reflect` - Process observations into learnings
+- `evolve` - Validate, promote, or decay knowledge
+- `question` - Track epistemic gaps and contradictions
+- `resolve` - Resolve contradictions and answer questions
+
+**Reasoning Tools:**
+- `predict` - Generate predictions from patterns
+- `explain` - Trace causal paths between states
+- `counterfactual` - Explore "what if" scenarios
+- `validate` - Check knowledge graph integrity
+
+**Relationship Tools:**
+- `relate` - Create relationships between memories
+- Plus memory management tools (update, delete, get)
 
 ## REST API
 
@@ -125,6 +139,9 @@ curl "http://localhost:3002/api/v1/health"
 ## Service Management
 
 ```bash
+# Start daemon
+local-memory start
+
 # Check daemon status
 local-memory status
 
@@ -141,26 +158,20 @@ local-memory kill_all
 local-memory doctor
 ```
 
-## What's New in v1.1.8
+## What's New in v1.3.0
 
-- **Complete CLI Interface Completeness** - All 4 phases delivered with full MCP/REST API parity
-  - Core memory operations (`get`, `list`)
-  - Relationship management (`find_related`, `discover`, `relate`, `map_graph`)
-  - Management operations (9 commands for categories, domains, sessions)
-  - Advanced features via consolidated `analyze` command
-- **MCP 2025-11-25 Specification Compliance** - Updated to latest MCP specification
-  - Protocol version is still 2024-11-05 since Claude CLI does not yet support version 2025-11-25
-  - JSON Schema 2020-12 compliance for all tool schemas
-  - Tool icons support (💾 🔍 🧠 📊 🏷️ etc.)
-  - Enhanced server description fields
-- **Comprehensive Evaluation Framework** - Advanced testing across all interfaces
-  - Cross-interface consistency validation (MCP, REST, CLI)
-  - Mandatory measurements framework (M1-M4 validation)
-  - Security testing and adversarial evaluation capabilities
+- **World Memory Knowledge Hierarchy** - Four-level knowledge progression system
+  - L0 Observations: Raw intake, ephemeral
+  - L1 Learnings: Candidate insights, volatile
+  - L2 Patterns: Validated generalizations, durable
+  - L3 Schemas: Theoretical frameworks, permanent
+- **Contradiction Detection** - Automatic conflict identification using 5-layer heuristics
+- **Epistemic Gap Tracking** - Track unknown unknowns through dedicated questions system
+- **Knowledge Evolution** - Validation, promotion, and decay mechanisms
+- **10 New MCP Tools** - observe, reflect, question, resolve, evolve, bootstrap, predict, explain, counterfactual, validate
 
 ## System Requirements
 
-- **Node.js**: 16.0.0 or higher
 - **RAM**: 512MB minimum
 - **Storage**: 100MB for binaries, variable for database
 - **Platforms**: macOS (Intel/ARM64), Linux x64, Windows x64
@@ -185,6 +196,7 @@ local-memory license status
 - **Architecture**: [localmemory.co/architecture](https://localmemory.co/architecture)
 - **Prompts**: [localmemory.co/prompts](https://localmemory.co/prompts)
 - **Support**: [Local Memory Discord](https://discord.gg/rMmn8xP3fZ)
+- **Releases Repo**: [Local Memory Releases](https://github.com/danieleugenewilliams/local-memory-releases)
 
 ---
 
