@@ -40,7 +40,10 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "local-memory": {
       "command": "/full/path/to/local-memory",
-      "args": ["--mcp"]
+      "args": [
+        "--mcp"
+      ],
+      "transport": "stdio"
     }
   }
 }
