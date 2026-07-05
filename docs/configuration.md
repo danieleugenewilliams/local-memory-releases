@@ -24,7 +24,7 @@ Local Memory creates and manages a dedicated configuration directory for all app
 └── storage/                 # Additional storage for embeddings and metadata
 ```
 
-**Security**: The directory is created with user-only access (0700 permissions) for security.
+**Security**: The config loader creates the directory with owner-only access (`0700`). Note that the `setup` wizard's location check creates it with `0755` instead. Because `mkdir -p` never re-modes an existing directory, the actual permissions are set by whichever code path runs first — often `0755` in practice. To enforce owner-only access, run `chmod 700 ~/.local-memory`.
 
 ## Configuration File Hierarchy
 
@@ -139,11 +139,13 @@ qdrant:
   url: "http://localhost:6333"                 # Qdrant API endpoint
   api_key: ""                                  # API key for authenticated access
   collection: "memory_embeddings"              # Vector collection name
-  timeout: "10s"                               # Request timeout
+  timeout: "30s"                               # Request timeout (raised for large collections)
   max_retries: 3                               # Retry attempts
   vector_size: 768                             # Embedding vector dimensions
   distance: "Cosine"                           # Similarity distance metric
 ```
+
+**Qdrant is optional and disabled by default.** Local Memory does **not** launch Qdrant for you — you must run it separately (and set `enabled: true`). At daemon startup Local Memory only *detects* Qdrant by probing `http://localhost:6333`. If Qdrant is disabled or unreachable, semantic search falls back to the built-in SQLite vector search, so core capture and retrieval keep working without it.
 
 ### REST API Configuration
 
@@ -189,6 +191,39 @@ session:
 - `uuid`: Generates random UUID
 - `custom`: Uses explicitly configured custom ID
 
+## Memory Evolution & Contradiction Detection
+
+Local Memory can promote frequently validated memories into higher-confidence learnings, decay stale ones, and flag contradictions between stored memories.
+
+### Evolution Configuration
+```yaml
+evolution:
+  validation_success_delta: 0.2                # Weight increase on successful validation
+  validation_failure_delta: 0.1               # Weight decrease on failed validation
+  decay_factor: 0.9                            # Weight multiplier applied during decay
+  archival_threshold: 0.5                      # Archive memories below this weight
+  l1_to_l2_validations: 3                      # Validations required for L1 -> L2 promotion
+  l1_to_l2_min_weight: 5.0                     # Minimum weight for L1 -> L2 promotion
+  l1_to_l2_min_confidence: 0.80                # Minimum confidence for L1 -> L2 promotion
+  l2_to_l3_validations: 5                      # Validations required for L2 -> L3 promotion
+  l2_to_l3_min_weight: 9.0                     # Minimum weight for L2 -> L3 promotion
+  l2_to_l3_min_confidence: 0.90                # Minimum confidence for L2 -> L3 promotion
+  decay_enabled: false                         # Scheduled decay is OFF by default
+  decay_interval_hours: 24                     # How often decay runs (when enabled)
+  decay_threshold_days: 30                     # Decay memories unused for this many days
+```
+
+**Promotion tiers:** memories start at L1. Reaching 3 validations with weight >= 5.0 and confidence >= 0.80 promotes L1 -> L2; reaching 5 validations with weight >= 9.0 and confidence >= 0.90 promotes L2 -> L3.
+
+**Scheduled decay is disabled by default** (`decay_enabled: false`). When enabled, decay runs every `decay_interval_hours` and reduces the weight of memories unused for longer than `decay_threshold_days`.
+
+### Contradiction Configuration
+```yaml
+contradiction:
+  enabled: true                                # Contradiction detection enabled by default
+  similarity_threshold: 0.85                   # High similarity required to compare two memories
+```
+
 ## Performance & Security
 
 ### Performance Configuration
@@ -217,7 +252,7 @@ All configuration settings can be overridden using environment variables with th
 ### Core Settings
 - `MEMORY_PROFILE` - Configuration profile selection
 - `MEMORY_DB_PATH` - Database file location
-- `MEMORY_LOG_LEVEL` - Logging verbosity level
+- `MEMORY_LOGGING_LEVEL` - Logging verbosity level (the bare `LOG_LEVEL` also works)
 - `MEMORY_LICENSE_KEY` - License key for activation
 
 ### Service Settings
@@ -232,7 +267,7 @@ export LOCAL_MEMORY_CONFIG_DIR="$HOME/.local-memory"
 
 # Service configuration
 export MEMORY_REST_API_PORT="3002"
-export MEMORY_LOG_LEVEL="info"
+export MEMORY_LOGGING_LEVEL="info"
 export MEMORY_OLLAMA_BASE_URL="http://localhost:11434"
 
 # Security settings
@@ -294,11 +329,11 @@ local-memory start
 
 ### Setup Wizard
 ```bash
-# Interactive setup
+# First-run setup (auto-detects services)
 local-memory setup
 
-# Guided configuration wizard
-local-memory setup --wizard
+# Interactive setup wizard
+local-memory setup --interactive
 
 # Validate existing configuration
 local-memory validate
@@ -309,12 +344,14 @@ local-memory validate
 # Comprehensive system check
 local-memory doctor
 
-# Run doctor with custom config file
+# Run doctor with a custom config file
 local-memory doctor --config /path/to/config.yaml
 
-# Service connectivity check
-local-memory doctor --services
+# Machine-readable diagnostics
+local-memory doctor --json
 ```
+
+`doctor` already checks service connectivity (Ollama, Qdrant, REST API) as part of its standard run.
 
 ## Advanced Configuration
 
@@ -367,11 +404,11 @@ Critical settings like database path, license configuration, and core service UR
 
 1. **Configuration File Not Found**
    ```bash
-   # Check configuration search paths
-   local-memory doctor --config-paths
+   # Inspect configuration and search paths
+   local-memory doctor
 
-   # Generate default configuration
-   local-memory setup --defaults
+   # Regenerate configuration with defaults
+   local-memory setup --silent
    ```
 
 2. **Permission Issues**
@@ -379,17 +416,14 @@ Critical settings like database path, license configuration, and core service UR
    # Fix directory permissions
    chmod 700 ~/.local-memory
 
-   # Recreate configuration directory
-   local-memory setup --reset
+   # Re-run setup to recreate the configuration directory
+   local-memory setup
    ```
 
 3. **Service Connection Issues**
    ```bash
-   # Test service connectivity
-   local-memory doctor --services
-
-   # Auto-detect services
-   local-memory setup --auto-detect
+   # Check service connectivity (Ollama, Qdrant, REST API)
+   local-memory doctor
    ```
 
 ### Configuration Debugging
