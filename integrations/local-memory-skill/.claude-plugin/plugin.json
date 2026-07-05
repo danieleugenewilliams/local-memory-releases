@@ -1,0 +1,13 @@
+{
+  "name": "local-memory",
+  "version": "1.0.0",
+  "description": "Persistent knowledge for AI agents: capture insights, recall prior context, and grow durable expertise across sessions with the Local Memory MCP server.",
+  "author": {
+    "name": "D.E. Williams & Co.",
+    "url": "https://localmemory.co"
+  },
+  "homepage": "https://localmemory.co",
+  "repository": "https://github.com/danieleugenewilliams/local-memory-releases",
+  "license": "SEE LICENSE IN README",
+  "keywords": ["local-memory", "mcp", "memory", "knowledge", "world-memory", "agent-skill"]
+}

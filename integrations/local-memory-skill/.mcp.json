@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "local-memory": {
+      "type": "stdio",
+      "command": "local-memory",
+      "args": ["--mcp"]
+    }
+  }
+}
