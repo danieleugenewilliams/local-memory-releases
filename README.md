@@ -1,6 +1,6 @@
 # Local Memory - Binary Distribution
 
-**Version 1.4.1** - Ready-to-run binaries for macOS, Linux, and Windows.
+**Version 1.5.1** - Ready-to-run binaries for macOS, Linux, and Windows.
 
 Local Memory is an AI-powered persistent memory system with vector search, semantic analysis, and intelligent categorization through the Model Context Protocol (MCP). It works with Claude Code, Claude Desktop, Gemini, Codex, Cursor, and other MCP-compatible tools.
 
@@ -10,8 +10,8 @@ Local Memory is an AI-powered persistent memory system with vector search, seman
 |----------|----------|
 | **macOS (Apple Silicon)** | [local-memory-macos-arm](https://github.com/danieleugenewilliams/local-memory-releases/releases/latest/download/local-memory-macos-arm) |
 | **macOS (Intel)** | [local-memory-macos-intel](https://github.com/danieleugenewilliams/local-memory-releases/releases/latest/download/local-memory-macos-intel) |
-| **macOS (Universal)** | [local-memory-universal.zip](https://github.com/danieleugenewilliams/local-memory-releases/releases/latest/download/local-memory-universal.zip) |
 | **Linux (x64)** | [local-memory-linux](https://github.com/danieleugenewilliams/local-memory-releases/releases/latest/download/local-memory-linux) |
+| **Linux (ARM64)** | [local-memory-linux-arm](https://github.com/danieleugenewilliams/local-memory-releases/releases/latest/download/local-memory-linux-arm) |
 | **Windows (x64)** | [local-memory-windows.exe](https://github.com/danieleugenewilliams/local-memory-releases/releases/latest/download/local-memory-windows.exe) |
 
 ## Quick Start
@@ -21,13 +21,13 @@ Local Memory is an AI-powered persistent memory system with vector search, seman
 chmod +x ./local-memory-*
 
 # 2. Activate license
-./local-memory license activate LM-XXXX-XXXX-XXXX-XXXX-XXXX
+./local-memory license activate LM-XXXX-XXXX-XXXX-XXXX-XXXX --accept_terms
 
 # 3. Start the service
 ./local-memory start
 
 # 4. Store and search memories
-./local-memory remember "Important project notes"
+./local-memory observe "Important project notes"
 ./local-memory search "project notes"
 ```
 
@@ -59,7 +59,22 @@ Use the full path to your downloaded binary.
 
 **Linux**: Ensure executable permissions with `chmod +x ./local-memory-linux`.
 
-## What's New in v1.4.1
+## Agent Skill
+
+A cross-vendor [Agent Skill](https://agentskills.io) that teaches AI agents to use Local Memory well — capture insights, recall prior context, and grow durable expertise across sessions — lives in [`integrations/local-memory-skill/`](integrations/local-memory-skill/). It works with Claude Code/Desktop, OpenAI Codex, Gemini CLI, Cursor, GitHub Copilot/VS Code, and Windsurf. See its [README](integrations/local-memory-skill/README.md) to install as a Claude Code plugin or copy into any agent's skills directory.
+
+## What's New
+
+### v1.5.1 — Questions Listing Tool
+
+- **`questions` tool** (MCP, REST, CLI) — list pending questions, contradictions, and epistemic gaps with filters (`status`, `question_type`, `priority_min`, `domain`) and four response formats. Closes the triage gap where pending items were only reachable via raw SQLite queries.
+
+### v1.5.0 — Knowledge Engineering Maturity
+
+- Completes the shift from a CRUD store to a knowledge-engineering system: knowledge-level vocabulary (Observation → Learning → Pattern → Schema) surfaces in every response, a safe and idempotent `observe → reflect → evolve` pipeline, consistent enrichment across MCP/REST/CLI, and six security fixes.
+- **Breaking changes** when upgrading from 1.4.x: the `store_memory` (MCP) and `remember` (CLI) commands were removed — use `observe` instead; the response shapes of `observe`, `question`, `reflect`, `evolve`, and `validate` changed; and `validate` auto-fix is now gated behind an explicit confirmation. See the full changelog for migration details.
+
+### Earlier — v1.4.1
 
 - **Multi-Provider AI Backend** - Mix and match AI providers for embeddings and chat: Ollama (local, default), OpenAI, Anthropic (Claude), claude CLI, and OpenAI-compatible servers (LM Studio, vLLM, LocalAI). Fallback chains and circuit breakers for resilience.
 - **Agent Attribution** - Track which agent and machine stored each memory with automatic detection
